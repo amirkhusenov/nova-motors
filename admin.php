@@ -2,6 +2,7 @@
 session_start();
 require_once 'config.php';
 require_once 'database.php';
+require_once 'booking_notifications.php';
 
 if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id']) || $_SESSION['user_id'] !== 'admin') {
     session_unset();
@@ -18,22 +19,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $bookingId = (int)$_POST['booking_id'];
         
         try {
-            switch ($_POST['action']) {
-                case 'approve':
-                    if ($db->updateBookingStatus($bookingId, 1)) {
-                        $success = 'Бронирование одобрено и сохранено в базе данных';
-                    } else {
-                        $error = 'Ошибка при одобрении бронирования';
-                    }
-                    break;
-                    
-                case 'reject':
-                    if ($db->updateBookingStatus($bookingId, 2)) {
-                        $success = 'Бронирование отклонено';
-                    } else {
-                        $error = 'Ошибка при отклонении бронирования';
-                    }
-                    break;
+            // Получаем данные о бронировании перед изменением статуса
+            $booking = $db->getBookingById($bookingId);
+            
+            if (!$booking) {
+                $error = 'Бронирование не найдено';
+            } else {
+                switch ($_POST['action']) {
+                    case 'approve':
+                        if ($db->updateBookingStatus($bookingId, 1)) {
+                            // Отправляем email об одобрении
+                            try {
+                                $carName = getCarName($booking['car']);
+                                $carPrice = getCarPrice($booking['car']);
+                                sendBookingApprovalEmail(
+                                    $booking['customer_email'], 
+                                    $booking['customer_name'], 
+                                    $carName, 
+                                    $booking['start'], 
+                                    $booking['end'], 
+                                    $carPrice
+                                );
+                                $success = 'Бронирование одобрено и уведомление отправлено на email';
+                            } catch (Exception $e) {
+                                $success = 'Бронирование одобрено, но ошибка отправки email: ' . $e->getMessage();
+                            }
+                        } else {
+                            $error = 'Ошибка при одобрении бронирования';
+                        }
+                        break;
+                        
+                    case 'reject':
+                        if ($db->updateBookingStatus($bookingId, 2)) {
+                            // Отправляем email об отклонении
+                            try {
+                                $carName = getCarName($booking['car']);
+                                sendBookingRejectionEmail(
+                                    $booking['customer_email'], 
+                                    $booking['customer_name'], 
+                                    $carName, 
+                                    $booking['start'], 
+                                    $booking['end']
+                                );
+                                $success = 'Бронирование отклонено и уведомление отправлено на email';
+                            } catch (Exception $e) {
+                                $success = 'Бронирование отклонено, но ошибка отправки email: ' . $e->getMessage();
+                            }
+                        } else {
+                            $error = 'Ошибка при отклонении бронирования';
+                        }
+                        break;
+                }
             }
         } catch (Exception $e) {
             $error = 'Ошибка: ' . $e->getMessage();
@@ -63,7 +99,9 @@ try {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./notifications.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="./notifications.js" defer></script>
 </head>
 
 <body class="profile-page">
@@ -255,5 +293,18 @@ try {
             </div>
         </div>
     </div>
+
+    <script>
+        // Показываем уведомления на основе PHP переменных
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if ($error): ?>
+                showError('<?php echo addslashes($error); ?>');
+            <?php endif; ?>
+            
+            <?php if ($success): ?>
+                showSuccess('<?php echo addslashes($success); ?>');
+            <?php endif; ?>
+        });
+    </script>
 </body>
 </html>

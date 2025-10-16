@@ -1,0 +1,113 @@
+/* Дополнительные стили для уведомлений */
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    #notification-container {
+        bottom: 10px !important;
+        right: 10px !important;
+        left: 10px !important;
+        max-width: none !important;
+    }
+
+    .notification {
+        font-size: 13px !important;
+        padding: 12px 16px !important;
+    }
+}
+
+/* Анимации для появления/исчезновения */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* Стили для кнопки закрытия */
+.notification-close:hover {
+    opacity: 1 !important;
+    transform: scale(1.1);
+}
+
+.notification-close:active {
+    transform: scale(0.95);
+}
+
+/* Стили для разных типов уведомлений */
+.notification-success {
+    animation: slideInRight 0.3s ease;
+}
+
+.notification-error {
+    animation: slideInRight 0.3s ease;
+}
+
+.notification-warning {
+    animation: slideInRight 0.3s ease;
+}
+
+.notification-info {
+    animation: slideInRight 0.3s ease;
+}
+
+/* Эффект при клике на уведомление */
+.notification {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notification:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Прогресс-бар для показа оставшегося времени */
+.notification::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 8px 8px;
+    animation: progressBar 5s linear forwards;
+}
+
+@keyframes progressBar {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+/* Специальные стили для уведомлений без автозакрытия */
+.notification-alert::after {
+    display: none;
+}
+
+/* Темная тема (если нужно) */
+@media (prefers-color-scheme: dark) {
+    .notification {
+        backdrop-filter: blur(10px);
+    }
+}

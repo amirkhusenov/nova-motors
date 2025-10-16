@@ -72,7 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./notifications.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="./notifications.js" defer></script>
 </head>
 
 <body class="profile-page">
@@ -468,7 +470,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             const totalPrice = document.getElementById('totalPrice').value;
             
             if (!startDate || !endDate || !totalPrice) {
-                alert('Пожалуйста, заполните все поля и выберите даты');
+                showError('Пожалуйста, заполните все поля и выберите даты');
                 return;
             }
             
@@ -506,6 +508,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             };
             return carMap[carName] || 1;
         }
+
+        // Показываем уведомления на основе PHP переменных
+        <?php if (isset($booking_error) && $booking_error): ?>
+            showError('<?php echo addslashes($booking_error); ?>');
+        <?php endif; ?>
+        
+        <?php if (isset($booking_success) && $booking_success): ?>
+            showSuccess('<?php echo addslashes($booking_success); ?>');
+        <?php endif; ?>
     </script>
 </body>
 

@@ -125,7 +125,7 @@ class Database {
     }
 
     public function getBookingById($id) {
-        $stmt = $this->connection->prepare("SELECT * FROM rent WHERE id = ?");
+        $stmt = $this->connection->prepare("SELECT r.*, u.login as customer_name, u.email as customer_email FROM rent r LEFT JOIN users u ON r.customer = u.id WHERE r.id = ?");
         $stmt->execute([$id]);
         $booking = $stmt->fetch();
         

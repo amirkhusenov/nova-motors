@@ -144,6 +144,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
     
+    <link rel="stylesheet" href="./notifications.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./notifications.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if (isset($error) && $error): ?>
+                showError('<?php echo addslashes($error); ?>');
+            <?php endif; ?>
+            
+            <?php if (isset($success) && $success): ?>
+                showSuccess('<?php echo addslashes($success); ?>');
+            <?php endif; ?>
+        });
+    </script>
 </body>
 </html>
