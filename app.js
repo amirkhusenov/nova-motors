@@ -34,13 +34,6 @@ document.querySelectorAll('.car-card').forEach((card, index) => {
     card.style.transitionDelay = `${index * 0.1}s`;
 });
 
-document.querySelectorAll('.rent-btn').forEach(button => {
-    button.addEventListener('click', function (e) {
-        e.preventDefault();
-        handleRentOrBooking();
-    });
-});
-
 const bookButton = document.querySelector('.btn-cta-secondary');
 if (bookButton) {
     bookButton.addEventListener('click', function (e) {

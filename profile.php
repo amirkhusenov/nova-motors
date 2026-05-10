@@ -243,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                                                     <?php echo date('d.m.Y', strtotime($booking['end'])); ?>
                                                 </p>
                                                 <p class="booking-price">
-                                                    <i class="bi bi-currency-dollar me-2"></i>
+                                                    <i class="bi bi-currency-ruble me-2"></i>
                                                     <?php echo htmlspecialchars($booking['price']); ?> ₽
                                                 </p>
                                             </div>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 require_once 'config.php';
 require_once 'database.php';
@@ -8,7 +8,7 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
         $db = new Database();
         $user_check = $db->getUserById($_SESSION['user_id']);
         if ($user_check) {
-            if ($_SESSION['user_id'] === 'admin') {
+            if (($user_check['role_code'] ?? '') === 'admin') {
                 header('Location: ./admin.php');
             } else {
                 header('Location: ./profile.php');
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
     $login = trim($_POST['login'] ?? '');
-    
+
     if (empty($email) || empty($password) || empty($confirm_password) || empty($login)) {
         $error = 'Все поля обязательны для заполнения';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         try {
             $db = new Database();
-            
+
             if ($db->userExists($email)) {
                 $error = 'Пользователь с таким email уже существует';
             } elseif ($db->loginExists($login)) {
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация - NOVA MOTORS</title>
-    
+
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
@@ -88,52 +88,60 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <h1>Регистрация</h1>
                             <p>Создайте аккаунт для аренды автомобилей</p>
                         </div>
-                        
+
                         <?php if ($error): ?>
                             <div class="alert alert-danger" role="alert">
                                 <i class="bi bi-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error); ?>
                             </div>
                         <?php endif; ?>
-                        
+
                         <?php if ($success): ?>
                             <div class="alert alert-success" role="alert">
                                 <i class="bi bi-check-circle me-2"></i><?php echo htmlspecialchars($success); ?>
                             </div>
                         <?php endif; ?>
-                        
+
                         <form method="POST" action="">
                             <div class="mb-3">
                                 <label for="login" class="form-label">Логин</label>
-                                <input type="text" class="form-control" id="login" name="login" 
-                                       value="<?php echo htmlspecialchars($login ?? ''); ?>" 
+                                <input type="text" class="form-control" id="login" name="login"
+                                       value="<?php echo htmlspecialchars($login ?? ''); ?>"
                                        placeholder="Введите логин" required>
                                 <small class="form-text text-muted">Используйте буквы, цифры, дефисы, подчеркивания или точки</small>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" 
-                                       value="<?php echo htmlspecialchars($email ?? ''); ?>" 
+                                <input type="email" class="form-control" id="email" name="email"
+                                       value="<?php echo htmlspecialchars($email ?? ''); ?>"
                                        placeholder="Введите ваш email" required>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="password" class="form-label">Пароль</label>
-                                <input type="password" class="form-control" id="password" name="password" 
-                                       placeholder="Введите пароль" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Введите пароль" required>
+                                    <button class="btn btn-outline-secondary js-toggle-password" type="button" data-target="password" aria-label="Показать пароль">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
                             </div>
-                            
+
                             <div class="mb-4">
                                 <label for="confirm_password" class="form-label">Подтвердите пароль</label>
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
-                                       placeholder="Повторите пароль" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Повторите пароль" required>
+                                    <button class="btn btn-outline-secondary js-toggle-password" type="button" data-target="confirm_password" aria-label="Показать пароль">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
                             </div>
-                            
+
                             <button type="submit" class="btn btn-primary btn-auth w-100">
                                 <i class="bi bi-person-plus me-2"></i>Зарегистрироваться
                             </button>
                         </form>
-                        
+
                         <div class="auth-links">
                             <p>Уже есть аккаунт? <a href="./login.php">Войти</a></p>
                             <p><a href="./index.php">← Вернуться на главную</a></p>
@@ -143,20 +151,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         </div>
     </div>
-    
+
     <link rel="stylesheet" href="./notifications.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./notifications.js"></script>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             <?php if (isset($error) && $error): ?>
                 showError('<?php echo addslashes($error); ?>');
             <?php endif; ?>
-            
+
             <?php if (isset($success) && $success): ?>
                 showSuccess('<?php echo addslashes($success); ?>');
             <?php endif; ?>
+
+            document.querySelectorAll('.js-toggle-password').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const input = document.getElementById(button.getAttribute('data-target'));
+                    const icon = button.querySelector('i');
+                    if (!input || !icon) return;
+                    const show = input.type === 'password';
+                    input.type = show ? 'text' : 'password';
+                    icon.classList.toggle('bi-eye', !show);
+                    icon.classList.toggle('bi-eye-slash', show);
+                });
+            });
         });
     </script>
 </body>
